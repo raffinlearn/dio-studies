@@ -1,88 +1,80 @@
 import json
 from pathlib import Path
+from datetime import date
+
 from clientes import PessoaFisica
+from contas import ContaCorrente
 
-def ler_json(caminho, nome_arquivo):
-    arquivo_json = caminho / nome_arquivo
-    with open(arquivo_json, "r", encoding="utf-8") as arquivo:
-        dados = json.load(arquivo)
-    return dados
+DIRETORIO = Path(__file__).resolve().parent / "dados"
+ARQUIVO = DIRETORIO / "banco.json"
 
-def salvar_json(caminho, nome_arquivo, dados):
-    arquivo_json = caminho / nome_arquivo
-    with open(arquivo_json, "w", encoding="utf-8") as arquivo:
+
+def salvar_dados(clientes):
+    DIRETORIO.mkdir(parents=True, exist_ok=True)
+
+    dados = []
+
+    for cliente in clientes:
+        registro = cliente.registro()
+        registro["contas"] = []
+
+        for conta in cliente.contas:
+            registro["contas"].append(
+                {
+                    "numero": conta.numero,
+                    "agencia": conta.agencia,
+                    "saldo": conta.saldo,
+                    "historico": conta.historico.transacoes,
+                }
+            )
+
+        dados.append(registro)
+
+    with ARQUIVO.open("w", encoding="utf-8") as arquivo:
         json.dump(dados, arquivo, indent=4, ensure_ascii=False)
 
-def caminho_cliente(nome):
-    caminho = Path(f"dados/clientes/{nome}")
-    return caminho
 
-def caminho_conta(nome, conta):
-    caminho = Path(f"dados/clientes/{nome}/conta_{conta}")
-    return caminho
+def carregar_dados():
+    if not ARQUIVO.exists():
+        return []
 
-def criar_pasta(nome, numero_conta=0):
-    caminho = caminho_cliente(nome)
-    if not caminho.exists():
-        caminho.mkdir(parents=True, exist_ok=True)
+    with ARQUIVO.open("r", encoding="utf-8") as arquivo:
+        dados = json.load(arquivo)
 
-    elif numero_conta != 0:
-        caminho = caminho_conta(nome, numero_conta)
+    clientes = []
 
-        if not caminho.exists():
-            caminho.mkdir(parents=True, exist_ok=True)
+    for registro in dados:
+        cliente = PessoaFisica(
+            nome=registro["nome"],
+            data_nascimento=date.fromisoformat(registro["data_nascimento"]),
+            cpf=registro["cpf"],
+            telefone=registro["telefone"],
+            endereco=registro["endereco"],
+        )
+
+        for dados_conta in registro["contas"]:
+            conta = ContaCorrente.nova_conta(cliente, dados_conta["numero"])
+
+            conta._saldo = dados_conta["saldo"]
+
+            conta.historico.transacoes.extend(dados_conta["historico"])
+
+            cliente.adicionar_conta(conta)
+
+        clientes.append(cliente)
+
+    return clientes
 
 
-def criar_cadastro():
-    nome = input("Nome: ")
-    ano_nascimento = input("Ano de Nascimento: ")
-    cpf = input("CPF: ")
-    telefone = input("Telefone DDD+Numero: ")
-    endereço = input("Endereço Rua/n: ")
+def buscar_cliente(clientes, cpf):
+    for cliente in clientes:
+        if cliente.cpf == cpf:
+            return cliente
 
-    pessoa = PessoaFisica(nome, ano_nascimento, cpf, telefone, endereço)
+    return None
 
-    cadastro = {
-        "dados": pessoa.dados,
-        "contas": []   
-    }
 
-    nome = nome.replace(' ','_').lower()
-    criar_pasta(nome)
-    caminho = caminho_cliente(nome)
-    salvar_json(caminho, "dados_cadastrais", cadastro )
-    return cadastro
+def proximo_numero_conta(clientes):
+    numeros = [conta.numero for cliente in clientes for conta in cliente.contas]
 
-def criar_conta(cliente):
-    from contas import ContaCorrente
-    contas = cliente["contas"]
-    if contas:
-        numero_conta = contas[-1]["numero"] + 1
-    else:
-        numero_conta = 1
-
-    conta = ContaCorrente(numero_conta)
-    nome = cliente["dados"]["nome"]
-    nome = nome.replace(" ", "_").lower()
-
-    criar_pasta(nome, numero_conta)
-    criar_historico(nome, numero_conta)
-
-    caminho = caminho_cliente(nome)
-    cadastro = ler_json(caminho, "dados_cadastrais.json")
-
-    dados_conta = {
-        "agencia": conta.agencia,
-        "numero": conta.numero,
-        "tipo": "corrente",
-        "saldo": conta.saldo
-    }
-
-    cadastro["contas"].append(dados_conta)
-    salvar_json(caminho, "dados_cadastrais.json", cadastro)
-  
-
-def criar_historico(nome, conta):
-    caminho = caminho_conta(nome, conta)
-    historico = []
-    salvar_json(caminho, "historico", historico)
+    return max(numeros, default=0) + 1

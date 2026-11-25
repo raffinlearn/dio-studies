@@ -1,23 +1,47 @@
-from transaçao import Historico
+from datetime import date
+
+from transacoes import Historico
+
 
 class Conta:
 
-    def __init__(self, numero_conta):
-        self.agencia = "0001"
-        self.numero = numero_conta
-        self._saldo = 0
+    def __init__(self, numero, cliente):
+        self._saldo = 0.0
+        self._numero = numero
+        self._agencia = "0001"
+        self._cliente = cliente
         self._historico = Historico()
+
+    @classmethod
+    def nova_conta(cls, cliente, numero):
+        return cls(numero, cliente)
 
     @property
     def saldo(self):
         return self._saldo
 
+    @property
+    def numero(self):
+        return self._numero
+
+    @property
+    def agencia(self):
+        return self._agencia
+
+    @property
+    def cliente(self):
+        return self._cliente
+
+    @property
+    def historico(self):
+        return self._historico
+
     def sacar(self, valor):
         if valor <= 0:
-            print("Valor inválido: Valor do saque deve ser maior que zero.")
+            print("Valor inválido.")
 
-        elif valor > self._saldo:
-            print("Saldo insuficiente: Saque não realizado.")
+        elif valor > self.saldo:
+            print("Saldo insuficiente.")
 
         else:
             self._saldo -= valor
@@ -28,39 +52,48 @@ class Conta:
 
     def depositar(self, valor):
         if valor <= 0:
-            print("Valor inválido: Valor do depósito deve ser maior que zero.")
+            print("Valor inválido.")
             return False
-        else:
-            self._saldo += valor
-            print("Depósito realizado com sucesso!")
-            return True
+
+        self._saldo += valor
+        print("Depósito realizado com sucesso!")
+        return True
 
     def mostrar_extrato(self):
-        self._historico.abrir_extrato(self.nome, self.numero)
-        return str(self._historico)
+        return str(self.historico)
 
 
 class ContaCorrente(Conta):
 
-    def __init__(self, numero_conta, limite=500, limite_saques=3):
-        super().__init__(numero_conta)
-        self.limite = limite
-        self.limite_saques = limite_saques
-        self._saques_realizados = 0
+    def __init__(self, numero, cliente, limite=500, limite_saques=3):
+        super().__init__(numero, cliente)
+
+        self._limite = limite
+        self._limite_saques = limite_saques
 
     def sacar(self, valor):
+        hoje = date.today().isoformat()
 
-        if self._saques_realizados >= self.limite_saques:
-            print("Limite de saques atingido.")
+        numero_saques = sum(
+            1
+            for transacao in self.historico.transacoes
+            if transacao["tipo"] == "Saque" and transacao["data_hora"].startswith(hoje)
+        )
+
+        if numero_saques >= self._limite_saques:
+            print("Limite diário de saques atingido.")
             return False
 
-        if valor > self.limite:
+        if valor > self._limite:
             print("Valor de saque excedeu o limite.")
             return False
 
-        saque_realizado = super().sacar(valor)
-        if saque_realizado:
-            self._saques_realizados += 1
-            return True
+        return super().sacar(valor)
 
-        return False
+    def __str__(self):
+        return (
+            f"Agência: {self.agencia}\n"
+            f"Conta: {self.numero}\n"
+            f"Titular: {self.cliente.nome}\n"
+            f"Saldo: R$ {self.saldo:.2f}"
+        )

@@ -229,3 +229,6 @@ data/
 # Arquivos do sistema operacional
 .DS_Store
 Thumbs.db
+
+# Teste local de validação do sistema bancário V03
+/projects/banking-system/v03/teste_integracao.py
