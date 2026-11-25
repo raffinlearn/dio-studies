@@ -4,227 +4,356 @@
 
 Terceira versão do sistema bancário desenvolvido em Python como parte dos desafios de projeto da plataforma Digital Innovation One (DIO).
 
-Esta versão apresenta a evolução da aplicação para o paradigma de programação orientada a objetos (POO), utilizando classes, objetos, herança, encapsulamento, abstração, polimorfismo e composição.
+Esta versão introduz a programação orientada a objetos (POO), seguindo a modelagem UML proposta durante o curso e ampliando a implementação com gerenciamento de múltiplas contas, persistência de dados em arquivos JSON e controle diário de saques.
 
-A implementação busca representar as entidades de um sistema bancário, distribuindo as responsabilidades entre clientes, contas, transações e histórico de movimentações.
+O sistema simula um caixa eletrônico através de uma interface interativa no terminal, permitindo cadastrar clientes, gerenciar contas correntes e realizar operações bancárias.
 
-Também propõe a evolução da persistência de dados iniciada na versão anterior, utilizando uma estrutura de diretórios e arquivos JSON individuais para clientes e contas.
+## Status do projeto
+
+🟢 **Concluído — Implementação funcional e validada dentro do escopo educacional.**
 
 ## Objetivos
 
 - Aplicar os princípios da programação orientada a objetos.
-- Modelar entidades e relacionamentos.
-- Distribuir responsabilidades entre classes.
-- Utilizar herança e polimorfismo.
-- Aplicar encapsulamento de atributos.
-- Implementar classes abstratas.
-- Trabalhar com composição de objetos.
-- Organizar as regras de negócio.
-- Integrar as operações bancárias ao histórico de transações.
-- Aprimorar a persistência de dados.
-- Desenvolver uma aplicação modular e organizada.
+- Implementar a modelagem UML proposta pela DIO.
+- Modelar entidades e seus relacionamentos.
+- Aplicar herança, encapsulamento, abstração e polimorfismo.
+- Desenvolver uma aplicação modular.
+- Implementar regras de negócio bancárias.
+- Gerenciar clientes e múltiplas contas.
+- Persistir e recuperar dados utilizando arquivos JSON.
+- Consolidar boas práticas de programação.
+- Validar o funcionamento das operações bancárias.
 
-## Modelagem do sistema
+## Funcionalidades
 
-A aplicação é dividida em oito classes principais.
+### Gerenciamento de clientes
+
+- Cadastro de clientes pessoa física.
+- Cadastro de nome, CPF, data de nascimento, telefone e endereço.
+- Identificação de clientes através do CPF.
+- Normalização do CPF informado.
+- Validação do formato do CPF.
+- Prevenção de cadastros duplicados.
+- Validação da data de nascimento.
+- Recuperação de clientes previamente cadastrados.
+
+### Gerenciamento de contas
+
+- Criação de contas correntes.
+- Geração automática e sequencial do número da conta.
+- Associação entre cliente e conta bancária.
+- Gerenciamento de múltiplas contas por cliente.
+- Listagem das contas cadastradas.
+- Seleção de contas existentes.
+- Verificação da titularidade durante a execução de transações.
+
+### Depósitos
+
+- Realização de depósitos.
+- Validação de valores positivos.
+- Validação de valores finitos na interface.
+- Atualização do saldo bancário.
+- Registro da movimentação no histórico.
+- Persistência dos dados após a operação.
+
+### Saques
+
+- Realização de saques.
+- Validação do valor solicitado.
+- Verificação do saldo disponível.
+- Controle do limite por operação.
+- Controle da quantidade diária de saques.
+- Renovação automática do limite em uma nova data.
+- Registro das operações bem-sucedidas.
+- Persistência dos dados após a operação.
+
+### Extrato bancário
+
+- Consulta das movimentações realizadas.
+- Identificação do tipo de transação.
+- Exibição da data e hora da movimentação.
+- Exibição do valor de cada operação.
+- Consulta do saldo atualizado.
+- Recuperação das movimentações de sessões anteriores.
+
+### Persistência de dados
+
+- Criação automática do diretório de armazenamento.
+- Armazenamento de clientes, contas, saldos e transações em JSON.
+- Salvamento após alterações bem-sucedidas.
+- Recuperação automática dos dados ao iniciar a aplicação.
+- Reconstrução dos objetos a partir dos dados armazenados.
+- Preservação do histórico entre diferentes execuções.
+
+## Regras de negócio
+
+| Regra                    | Definição                                             |
+| ------------------------ | ----------------------------------------------------- |
+| Agência bancária         | 0001                                                  |
+| Saldo inicial            | R$ 0,00                                               |
+| Identificação do cliente | CPF                                                   |
+| Formato do CPF           | 11 dígitos numéricos                                  |
+| CPF duplicado            | Não permitido                                         |
+| Número da conta          | Sequencial e único no sistema                         |
+| Contas por cliente       | Múltiplas contas permitidas                           |
+| Valor de depósito        | Maior que zero                                        |
+| Valor de saque           | Maior que zero                                        |
+| Limite padrão por saque  | R$ 500,00                                             |
+| Limite diário padrão     | 3 saques por conta                                    |
+| Renovação do limite      | A cada nova data                                      |
+| Saldo insuficiente       | Operação não permitida                                |
+| Titularidade             | Transações realizadas em contas associadas ao cliente |
+| Histórico                | Somente operações bem-sucedidas                       |
+| Persistência             | Após alterações realizadas com sucesso                |
+| Data de nascimento       | Não pode ser futura                                   |
+
+## Modelagem orientada a objetos
+
+A aplicação utiliza oito classes principais, seguindo a estrutura proposta pela DIO.
 
 ### Cliente
 
-Representa a entidade base dos clientes do sistema bancário.
+Classe base responsável pelo gerenciamento dos clientes.
 
-Responsabilidades:
+Atributos:
 
-- Armazenar os dados do cliente.
-- Gerenciar as contas associadas.
-- Adicionar novas contas.
-- Intermediar a execução de transações em contas associadas ao cliente.
+- Endereço.
+- Lista de contas.
+
+Métodos principais:
+
+- `realizar_transacao()`
+- `adicionar_conta()`
+
+Responsável por associar contas ao cliente e intermediar a execução das transações.
 
 ### PessoaFisica
 
 Especialização da classe `Cliente`.
 
-Atributos cadastrais:
+Atributos:
 
 - Nome.
-- Ano de nascimento.
 - CPF.
+- Data de nascimento.
 - Telefone.
-- Endereço.
+- Endereço herdado.
+- Contas herdadas.
 
-Responsabilidades:
+Método adicional:
 
-- Representar um cliente pessoa física.
-- Organizar seus dados cadastrais.
-- Gerar uma representação dos dados em formato de dicionário.
+- `registro()`
+
+Responsável por representar os dados cadastrais e disponibilizá-los em formato adequado para persistência.
 
 ### Conta
 
-Representa a entidade base das contas bancárias.
+Classe base responsável pelas operações bancárias.
 
-Responsabilidades:
+Atributos:
 
-- Armazenar a agência.
-- Armazenar o número da conta.
-- Controlar o saldo.
-- Realizar depósitos.
-- Realizar saques.
-- Possuir um histórico de transações.
-- Disponibilizar a consulta de extrato.
+- Saldo.
+- Número da conta.
+- Agência.
+- Cliente titular.
+- Histórico.
 
-A consulta de extrato ainda necessita de integração com os dados do titular.
+Métodos principais:
+
+- `nova_conta()`
+- `sacar()`
+- `depositar()`
+- `mostrar_extrato()`
+
+Utiliza propriedades para disponibilizar a consulta dos atributos internos.
+
+O método `nova_conta()` utiliza `@classmethod` para permitir a criação de instâncias da própria classe ou de suas especializações.
 
 ### ContaCorrente
 
 Especialização da classe `Conta`.
 
-Responsabilidades:
+Atributos adicionais:
 
-- Controlar o limite por saque.
-- Controlar a quantidade de saques realizados.
-- Aplicar regras específicas de retirada.
-- Reutilizar as operações bancárias da classe base.
+- Limite por saque.
+- Limite diário de saques.
+
+Sobrescreve o método `sacar()` para aplicar regras específicas da conta corrente e reutiliza a implementação da classe base através de `super()`.
 
 ### Historico
 
-Responsável por representar o histórico de movimentações bancárias.
+Responsável pelo gerenciamento das transações bancárias.
 
-Responsabilidades previstas:
+Atributo:
 
-- Armazenar transações realizadas.
-- Recuperar movimentações persistidas em JSON.
-- Organizar os registros de transações.
-- Disponibilizar uma representação textual do extrato.
+- Lista de transações.
 
-A integração entre o histórico em memória e o armazenamento em arquivos ainda está em desenvolvimento.
+Métodos principais:
+
+- `adicionar_transacao()`
+- `__str__()`
+
+Armazena registros de movimentações e disponibiliza sua representação textual para consulta do extrato.
 
 ### Transacao
 
-Classe abstrata responsável por representar a estrutura base das transações bancárias.
+Classe abstrata que estabelece o contrato das transações bancárias.
 
 Atributos:
 
-- Identificador.
 - Valor.
 - Data e hora.
 
-Responsabilidades:
+Contrato abstrato:
 
-- Validar o valor da transação.
-- Definir a estrutura básica do registro.
-- Estabelecer um contrato abstrato para a geração dos registros das transações.
+- Propriedade `valor`.
+- Método `registrar()`.
+
+Método adicional:
+
+- `registro()`
+
+Define a estrutura comum das transações e disponibiliza uma representação compatível com JSON.
 
 ### Saque
 
-Especialização da classe `Transacao`.
+Especialização da classe abstrata `Transacao`.
 
 Responsabilidades:
 
-- Representar uma operação de retirada.
-- Executar o saque através da conta bancária.
-- Gerar o registro da operação.
-- Encaminhar transações bem-sucedidas ao histórico.
-
-A integração com o método de inclusão no histórico ainda necessita de correção.
+- Executar a operação de saque.
+- Retornar o resultado da operação.
+- Registrar a movimentação quando realizada com sucesso.
 
 ### Deposito
 
-Especialização da classe `Transacao`.
+Especialização da classe abstrata `Transacao`.
 
 Responsabilidades:
 
-- Representar uma operação de depósito.
-- Executar o depósito através da conta bancária.
-- Gerar o registro da operação.
-- Encaminhar transações bem-sucedidas ao histórico.
+- Executar a operação de depósito.
+- Retornar o resultado da operação.
+- Registrar a movimentação quando realizada com sucesso.
 
-A integração com o método de inclusão no histórico ainda necessita de correção.
+## Diagrama de classes
 
-## Relacionamentos entre classes
+```mermaid
+classDiagram
+    Cliente <|-- PessoaFisica
+    Conta <|-- ContaCorrente
+    Transacao <|-- Saque
+    Transacao <|-- Deposito
 
-| Classe               | Relacionamento | Classe relacionada |
-| -------------------- | -------------- | ------------------ |
-| `PessoaFisica`       | Herança        | `Cliente`          |
-| `ContaCorrente`      | Herança        | `Conta`            |
-| `Saque`              | Herança        | `Transacao`        |
-| `Deposito`           | Herança        | `Transacao`        |
-| `Cliente`            | Associação     | `Conta`            |
-| `Conta`              | Composição     | `Historico`        |
-| `Historico`          | Associação     | `Transacao`        |
-| `Saque` e `Deposito` | Dependência    | `Conta`            |
+    Cliente "1" -- "0..*" Conta
+    Conta "1" *-- "1" Historico
+    Historico ..> Transacao
+    Cliente ..> Transacao
+    Saque ..> Conta
+    Deposito ..> Conta
 
-Os relacionamentos representam a modelagem atual do domínio. Parte da integração entre os objetos e a camada de persistência ainda está em desenvolvimento.
+    class Cliente {
+        +endereco
+        +contas
+        +realizar_transacao()
+        +adicionar_conta()
+    }
 
-## Funcionalidades e situação atual
+    class PessoaFisica {
+        +nome
+        +cpf
+        +data_nascimento
+        +telefone
+        +registro()
+    }
 
-| Funcionalidade                       | Situação                                        |
-| ------------------------------------ | ----------------------------------------------- |
-| Modelagem de clientes                | Implementada                                    |
-| Modelagem de contas bancárias        | Implementada                                    |
-| Cadastro de clientes                 | Parcialmente implementado                       |
-| Criação de contas correntes          | Parcialmente implementada                       |
-| Identificação por CPF                | Parcialmente implementada                       |
-| Regras de depósito                   | Implementadas na classe Conta                   |
-| Regras de saque                      | Implementadas nas classes Conta e ContaCorrente |
-| Modelagem de transações              | Implementada                                    |
-| Registro de histórico                | Em integração                                   |
-| Consulta de extrato                  | Em desenvolvimento                              |
-| Persistência de dados cadastrais     | Em integração                                   |
-| Persistência de saldo                | Pendente                                        |
-| Persistência de transações           | Pendente                                        |
-| Recuperação de objetos armazenados   | Pendente                                        |
-| Menu completo de operações bancárias | Pendente                                        |
-| Testes automatizados                 | Pendente                                        |
+    class Conta {
+        -saldo
+        -numero
+        -agencia
+        -cliente
+        -historico
+        +nova_conta()
+        +sacar()
+        +depositar()
+        +mostrar_extrato()
+    }
 
-## Regras de negócio
+    class ContaCorrente {
+        -limite
+        -limite_saques
+        +sacar()
+        +__str__()
+    }
 
-| Regra                    | Definição                             |
-| ------------------------ | ------------------------------------- |
-| Agência bancária         | 0001                                  |
-| Saldo inicial            | R$ 0,00                               |
-| Valor de transação       | Maior que zero                        |
-| Limite padrão por saque  | R$ 500,00                             |
-| Limite padrão de saques  | 3 por instância da conta corrente     |
-| Saldo insuficiente       | Saque não permitido                   |
-| Associação de contas     | Cliente pode possuir múltiplas contas |
-| Registro de transações   | Operações realizadas com sucesso      |
-| Identificação do cliente | CPF                                   |
+    class Historico {
+        -transacoes
+        +adicionar_transacao()
+        +__str__()
+    }
+
+    class Transacao {
+        <<abstract>>
+        -valor
+        -data_hora
+        +valor()
+        +registrar()
+        +registro()
+    }
+
+    class Saque {
+        +valor()
+        +registrar()
+    }
+
+    class Deposito {
+        +valor()
+        +registrar()
+    }
+```
 
 ## Conceitos aplicados
 
 ### Programação orientada a objetos
 
 - Classes e objetos.
-- Construtores (`__init__`).
-- Atributos de instância.
-- Métodos de instância.
+- Construtores.
+- Atributos e métodos de instância.
 - Encapsulamento por convenção.
 - Propriedades com `@property`.
+- Métodos de classe com `@classmethod`.
 - Herança.
 - Polimorfismo.
-- Sobrescrita de métodos.
-- Utilização de `super()`.
 - Abstração.
 - Classes abstratas com `ABC`.
 - Métodos abstratos com `@abstractmethod`.
-- Composição.
-- Associação entre objetos.
-- Métodos especiais como `__str__`.
+- Sobrescrita de métodos.
+- Composição e associação.
+- Utilização de `super()`.
+- Métodos especiais como `__str__()`.
 
-### Conceitos complementares
+### Programação Python
 
 - Modularização.
 - Separação de responsabilidades.
-- Manipulação de arquivos.
-- Manipulação de diretórios.
-- Serialização JSON.
+- Funções reutilizáveis.
+- Classes como argumentos de funções.
+- Estruturas condicionais.
+- Correspondência de padrões com `match/case`.
+- Estruturas de repetição.
+- Expressões geradoras.
+- List comprehensions.
+- Tratamento de exceções.
+- Early return.
+- Manipulação de strings.
 - Manipulação de datas e horários.
-- Listas e dicionários.
-- Validação de regras de negócio.
-- Tratamento de valores inválidos com `ValueError`.
+- Gerenciadores de contexto.
+- Manipulação de arquivos e diretórios.
+- Serialização e desserialização JSON.
 
 ## Tecnologias utilizadas
 
-- Python 3
+- Python 3.10 ou superior
 - JSON
 - Git
 - GitHub
@@ -232,159 +361,230 @@ Os relacionamentos representam a modelagem atual do domínio. Parte da integraç
 
 ### Bibliotecas da biblioteca padrão
 
-| Biblioteca | Finalidade                                   |
-| ---------- | -------------------------------------------- |
-| `abc`      | Implementação de classes e métodos abstratos |
-| `datetime` | Registro da data e hora das transações       |
-| `json`     | Persistência e recuperação de dados          |
-| `pathlib`  | Gerenciamento de caminhos e diretórios       |
+| Biblioteca | Finalidade                             |
+| ---------- | -------------------------------------- |
+| `abc`      | Classes e métodos abstratos            |
+| `datetime` | Manipulação de datas e horários        |
+| `json`     | Serialização e recuperação de dados    |
+| `pathlib`  | Gerenciamento de arquivos e diretórios |
+| `math`     | Validação de valores numéricos finitos |
 
 O projeto não necessita de bibliotecas externas.
 
-## Estrutura atual do projeto
+O desenvolvimento e os testes locais foram realizados utilizando Python 3.14.6.
 
-```
+## Estrutura do projeto
+
+```text
 v03/
 ├── clientes.py
 ├── contas.py
+├── main.py
 ├── sistema.py
-├── teste.py
-├── transaçao.py
+├── transacoes.py
 └── README.md
 ```
 
 ### Responsabilidades dos módulos
 
-| Arquivo        | Responsabilidade                                              |
-| -------------- | ------------------------------------------------------------- |
-| `clientes.py`  | Modelagem dos clientes e pessoas físicas                      |
-| `contas.py`    | Modelagem das contas e regras das operações bancárias         |
-| `transaçao.py` | Modelagem das transações e do histórico                       |
-| `sistema.py`   | Gerenciamento de arquivos, diretórios e persistência de dados |
-| `teste.py`     | Implementação experimental do fluxo do caixa eletrônico       |
+| Arquivo         | Responsabilidade                                    |
+| --------------- | --------------------------------------------------- |
+| `clientes.py`   | Modelagem dos clientes e pessoas físicas            |
+| `contas.py`     | Modelagem das contas e regras bancárias             |
+| `transacoes.py` | Classes abstratas, transações e histórico           |
+| `sistema.py`    | Persistência, recuperação e gerenciamento dos dados |
+| `main.py`       | Interface, menus e integração das funcionalidades   |
 
-O arquivo `teste.py` representa um protótipo de integração da aplicação e não uma suíte de testes automatizados.
+## Persistência de dados
 
-## Estrutura de armazenamento
+Os dados são armazenados localmente em um arquivo JSON.
 
-A persistência de dados foi planejada para utilizar uma estrutura individualizada por cliente e conta bancária.
-
-```
-dados/
-└── clientes/
-    └── nome_cliente/
-        ├── dados_cadastrais.json
-        ├── conta_1/
-        │   └── historico.json
-        └── conta_2/
-            └── historico.json
+```text
+v03/
+└── dados/
+    └── banco.json
 ```
 
-### Dados cadastrais
+O diretório e o arquivo de armazenamento são criados automaticamente quando necessário.
 
-Armazenamento previsto:
+### Estrutura dos dados
 
-- Nome.
-- Ano de nascimento.
-- CPF.
-- Telefone.
-- Endereço.
-- Contas bancárias associadas.
-- Dados e saldo das contas.
+Exemplo ilustrativo utilizando dados fictícios:
 
-### Histórico bancário
+```json
+[
+  {
+    "nome": "Cliente Teste",
+    "data_nascimento": "1995-05-10",
+    "cpf": "00000000000",
+    "telefone": "11900000000",
+    "endereco": "Rua Teste, 100",
+    "contas": [
+      {
+        "numero": 1,
+        "agencia": "0001",
+        "saldo": 800.0,
+        "historico": [
+          {
+            "tipo": "Deposito",
+            "valor": 1000.0,
+            "data_hora": "2026-11-24 10:00:00"
+          },
+          {
+            "tipo": "Saque",
+            "valor": 200.0,
+            "data_hora": "2026-11-24 10:05:00"
+          }
+        ]
+      }
+    ]
+  }
+]
+```
 
-Armazenamento previsto:
+Durante a inicialização, os registros armazenados são recuperados e convertidos novamente em objetos Python.
 
-- Identificador da transação.
-- Tipo da transação.
-- Valor.
-- Data e hora.
-
-A estrutura apresentada representa o objetivo da implementação. A geração, recuperação e atualização consistente desses arquivos ainda precisam ser finalizadas.
-
-Os dados locais não são versionados pelo Git.
+Os arquivos de dados locais não são versionados pelo Git, evitando a exposição de informações cadastrais.
 
 ## Como executar
 
-Acesse o diretório desta versão:
+Clone o repositório:
 
 ```bash
-cd projects/banking-system/v03
+git clone https://github.com/raffinlearn/dio-studies.git
 ```
 
-O ponto de entrada experimental está localizado no arquivo `teste.py`:
+Acesse o diretório do projeto:
 
 ```bash
-python teste.py
+cd dio-studies/projects/banking-system/v03
 ```
 
-**Atenção:** esta versão ainda está em desenvolvimento. O fluxo completo não está operacional e poderá apresentar erros relacionados à inicialização dos diretórios, persistência de arquivos e integração entre objetos.
+Execute a aplicação:
 
-## Fluxo previsto da aplicação
+```bash
+python main.py
+```
 
-1. Inicialização do caixa eletrônico.
-2. Identificação do cliente através do CPF.
-3. Recuperação ou criação do cadastro.
-4. Recuperação das contas associadas ao cliente.
-5. Criação ou seleção de uma conta corrente.
-6. Acesso ao menu de operações bancárias.
-7. Execução de depósitos e saques.
-8. Registro das transações realizadas.
-9. Atualização do saldo e do histórico.
-10. Consulta do extrato bancário.
-11. Persistência das alterações realizadas.
+Não é necessário instalar dependências externas ou criar manualmente os arquivos JSON.
+
+## Interface do sistema
+
+### Menu principal
+
+```text
+===================================
+          SISTEMA BANCÁRIO
+===================================
+
+[1] Cadastrar cliente
+[2] Acessar sistema
+[0] Encerrar
+```
+
+### Menu do cliente
+
+```text
+===================================
+          MENU DO CLIENTE
+===================================
+
+[1] Criar conta corrente
+[2] Listar contas
+[3] Acessar conta corrente
+[0] Voltar
+```
+
+### Caixa eletrônico
+
+```text
+===================================
+           CAIXA ELETRÔNICO
+===================================
+
+[1] Depositar
+[2] Sacar
+[3] Extrato
+[0] Voltar
+```
+
+## Fluxo da aplicação
+
+1. Inicialização do sistema.
+2. Recuperação dos dados armazenados.
+3. Cadastro ou identificação do cliente.
+4. Criação ou seleção de uma conta corrente.
+5. Acesso ao menu de operações bancárias.
+6. Execução de depósitos ou saques.
+7. Validação das regras de negócio.
+8. Atualização do saldo.
+9. Registro da movimentação no histórico.
+10. Persistência das alterações.
+11. Consulta do extrato.
+12. Encerramento da aplicação.
+
+## Testes e validação
+
+A implementação foi validada através de testes funcionais manuais e testes de integração locais utilizando `assert`.
+
+| Cenário validado              | Resultado |
+| ----------------------------- | --------- |
+| Cadastro de cliente           | Aprovado  |
+| Criação e associação de conta | Aprovado  |
+| Depósito                      | Aprovado  |
+| Limite por saque              | Aprovado  |
+| Saques válidos                | Aprovado  |
+| Limite diário de saques       | Aprovado  |
+| Histórico de transações       | Aprovado  |
+| Valores inválidos de depósito | Aprovado  |
+| Titularidade da conta         | Aprovado  |
+| Renovação do limite diário    | Aprovado  |
+| Saldo insuficiente            | Aprovado  |
+| Valores inválidos de saque    | Aprovado  |
+
+**Resultado: 12 de 12 grupos de testes locais aprovados.**
+
+Também foi realizada a validação manual do fluxo completo da aplicação, incluindo o encerramento, a reinicialização e a recuperação dos dados armazenados.
+
+O script utilizado para os testes de integração foi preservado localmente e não integra os arquivos publicados nesta versão.
 
 ## Evolução em relação às versões anteriores
 
-| Característica                  | V01 | V02     | V03                |
-| ------------------------------- | --- | ------- | ------------------ |
-| Programação procedural          | Sim | Sim     | Parcial            |
-| Modularização                   | Não | Sim     | Sim                |
-| Cadastro de clientes            | Não | Sim     | Em integração      |
-| Gerenciamento de contas         | Não | Sim     | Em integração      |
-| Persistência JSON               | Não | Parcial | Em desenvolvimento |
-| Programação orientada a objetos | Não | Não     | Sim                |
-| Herança                         | Não | Não     | Sim                |
-| Encapsulamento                  | Não | Não     | Sim                |
-| Classes abstratas               | Não | Não     | Sim                |
-| Polimorfismo                    | Não | Não     | Sim                |
-| Composição de objetos           | Não | Não     | Sim                |
-| Modelagem de transações         | Não | Não     | Sim                |
+| Característica                  | V01 | V02     | V03 |
+| ------------------------------- | --- | ------- | --- |
+| Operações bancárias             | Sim | Sim     | Sim |
+| Modularização                   | Não | Sim     | Sim |
+| Funções                         | Não | Sim     | Sim |
+| Cadastro de clientes            | Não | Sim     | Sim |
+| Múltiplas contas                | Não | Sim     | Sim |
+| Persistência de clientes        | Não | Sim     | Sim |
+| Persistência do saldo           | Não | Parcial | Sim |
+| Persistência do histórico       | Não | Não     | Sim |
+| Programação orientada a objetos | Não | Não     | Sim |
+| Herança                         | Não | Não     | Sim |
+| Encapsulamento                  | Não | Não     | Sim |
+| Classes abstratas               | Não | Não     | Sim |
+| Polimorfismo                    | Não | Não     | Sim |
+| Controle diário por data        | Não | Não     | Sim |
 
-## Roadmap de finalização
+## Limitações e possíveis melhorias
 
-- [x] Modelar as classes principais.
-- [x] Implementar as regras básicas de saque e depósito.
-- [x] Implementar herança e classes abstratas.
-- [x] Criar funções iniciais de manipulação de arquivos JSON.
-- [x] Implementar um menu experimental de clientes.
-- [ ] Padronizar nomes de arquivos, atributos e métodos.
-- [ ] Corrigir a criação dos diretórios e arquivos JSON.
-- [ ] Integrar clientes e contas através de objetos.
-- [ ] Implementar a recuperação dos objetos persistidos.
-- [ ] Corrigir a integração entre transações e histórico.
-- [ ] Implementar a persistência do saldo bancário.
-- [ ] Implementar a persistência do histórico de transações.
-- [ ] Finalizar o menu de operações bancárias.
-- [ ] Implementar o tratamento de entradas inválidas.
-- [ ] Validar as regras de negócio.
-- [ ] Implementar testes automatizados.
-- [ ] Atualizar a documentação final.
+Por se tratar de um projeto educacional, algumas características de sistemas bancários reais não fazem parte do escopo desta versão.
 
-## Limitações atuais
+Possíveis evoluções:
 
-- Inconsistências nos nomes dos arquivos JSON.
-- Inconsistências na nomenclatura dos métodos de histórico.
-- Ausência de referência direta ao titular na classe Conta.
-- Ausência de integração completa entre os objetos e a persistência.
-- Ausência de serialização adequada dos registros contendo data e hora.
-- Fluxo de criação de contas ainda incompleto.
-- Possibilidade de colisão entre diretórios de clientes com nomes iguais.
-- Identificação por CPF sem autenticação.
-- Ausência de testes automatizados.
+- Utilização de `Decimal` para representação monetária.
+- Autenticação e autorização de clientes.
+- Validação completa dos dígitos verificadores do CPF.
+- Tratamento de arquivos JSON corrompidos.
+- Aprimoramento do encapsulamento durante a recuperação dos objetos.
+- Validações adicionais diretamente nas entidades.
+- Persistência em bancos de dados relacionais.
+- Desenvolvimento de uma API REST.
+- Implementação de transferências bancárias.
+- Testes automatizados com frameworks especializados.
 
-Essas limitações serão tratadas durante a finalização do projeto.
+Essas melhorias não são necessárias para a conclusão do desafio atual.
 
 ## Referências
 
@@ -392,6 +592,10 @@ Essas limitações serão tratadas durante a finalização do projeto.
 - [Repositório oficial da Trilha Python — DIO](https://github.com/digitalinnovationone/trilha-python-dio)
 - [Documentação oficial do Python](https://docs.python.org/pt-br/3/)
 
-## Status
+## Conclusão
 
-**Em desenvolvimento — modelagem orientada a objetos implementada e integração das funcionalidades pendente.**
+Esta versão representa a consolidação dos conhecimentos de programação orientada a objetos aplicados ao desenvolvimento de uma aplicação bancária.
+
+A implementação demonstra a evolução das versões anteriores, integrando modelagem de entidades, regras de negócio, modularização, persistência de dados e interação com o usuário.
+
+O projeto foi concluído dentro do escopo educacional proposto, servindo como base para estudos futuros de desenvolvimento backend, bancos de dados e APIs REST.
